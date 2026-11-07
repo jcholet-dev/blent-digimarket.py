@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digimarket - Connexion / Inscription</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">Digimarket</h1>
+
+        <!-- Messages d'alerte globaux (Erreur ou Succès) -->
+        <div id="alertBox" class="hidden mb-4 p-3 rounded-lg text-sm text-center font-medium"></div>
+
+        <!-- Boutons de bascule (Onglets) -->
+        <div class="flex border-b border-gray-200 mb-6">
+            <button id="tabLogin" onclick="switchTab('login')" class="flex-1 pb-3 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition">Connexion</button>
+            <button id="tabRegister" onclick="switchTab('register')" class="flex-1 pb-3 text-center font-semibold text-gray-400 border-b-2 border-transparent transition">Inscription</button>
+        </div>
+
+        <!-- FORMULAIRE DE CONNEXION -->
+        <form id="formLogin" class="space-y-4" onsubmit="handleLogin(event)">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="loginEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                <input type="password" id="loginPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition shadow-md">
+                Se connecter
+            </button>
+        </form>
+
+        <!-- FORMULAIRE D'INSCRIPTION -->
+        <form id="formRegister" class="space-y-4 hidden" onsubmit="handleRegister(event)">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                <input type="text" id="regNom" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="regEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                <input type="password" id="regPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition shadow-md">
+                S'inscrire
+            </button>
+        </form>
+    </div>
+
+    <!-- Script JavaScript pour la gestion des requêtes et de l'UI -->
+    <script>
+        function switchTab(tab) {
+            const formLogin = document.getElementById('formLogin');
+            const formRegister = document.getElementById('formRegister');
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            hideAlert();
+
+            if (tab === 'login') {
+                formLogin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+                tabLogin.className = "flex-1 pb-3 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition";
+                tabRegister.className = "flex-1 pb-3 text-center font-semibold text-gray-400 border-b-2 border-transparent transition";
+            } else {
+                formRegister.classList.remove('hidden');
+                formLogin.classList.add('hidden');
+                tabRegister.className = "flex-1 pb-3 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition";
+                tabLogin.className = "flex-1 pb-3 text-center font-semibold text-gray-400 border-b-2 border-transparent transition";
+            }
+        }
+
+        function showAlert(message, type = 'error') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (type === 'error') {
+                alertBox.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                alertBox.classList.add('bg-green-100', 'text-green-700');
+            }
+        }
+
+        function hideAlert() {
+            document.getElementById('alertBox').classList.add('hidden');
+        }
+
+        // Gestion de la connexion
+        async function handleLogin(event) {
+            event.preventDefault();
+            hideAlert();
+
+            const email = document.getElementById('loginEmail').value;
+            const mot_de_passe = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, mot_de_passe })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showAlert(data.erreur || "Erreur de connexion");
+                    return;
+                }
+
+                // Succès : Stocker le token JWT dans le localStorage
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('role', data.role);
+
+                showAlert("Connexion réussie ! Redirection...", "success");
+                setTimeout(() => {
+                    // Ici tu pourras rediriger vers le catalogue ou le dashboard selon le rôle
+                    alert("Connecté en tant que : " + data.role);
+                }, 1000);
+
+            } catch (error) {
+                showAlert("Impossible de contacter le serveur.");
+            }
+        }
+
+        // Gestion de l'inscription
+        async function handleRegister(event) {
+            event.preventDefault();
+            hideAlert();
+
+            const nom = document.getElementById('regNom').value;
+            const email = document.getElementById('regEmail').value;
+            const mot_de_passe = document.getElementById('regPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nom, email, mot_de_passe })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showAlert(data.erreur || "Erreur lors de l'inscription");
+                    return;
+                }
+
+                showAlert("Compte créé avec succès ! Vous pouvez vous connecter.", "success");
+                document.getElementById('formRegister').reset();
+                setTimeout(() => switchTab('login'), 1500);
+
+            } catch (error) {
+                showAlert("Impossible de contacter le serveur.");
+            }
+        }
+    </script>
+</body>
+</html>

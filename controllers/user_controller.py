@@ -1,12 +1,13 @@
+#controller de la gestion utilisateur : enregistrement, authentification
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
 from models.user_model import User
 
 # Création du Blueprint
-auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+user_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 
-@auth_bp.route('/register', methods=['POST'])
+@user_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
 
@@ -27,7 +28,7 @@ def register():
     }), 201
 
 
-@auth_bp.route('/auth', methods=['POST'])
+@user_bp.route('/auth', methods=['POST'])
 def login():
     data = request.get_json()
 
@@ -41,7 +42,12 @@ def login():
         return jsonify({"erreur": "Email ou mot de passe incorrect"}), 401
 
     # Génération du token JWT
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={
+            "role": user["role"]
+        }
+    )
 
     return jsonify({
         "message": "Connexion réussie",

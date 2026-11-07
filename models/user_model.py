@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 
@@ -25,13 +25,15 @@ class User(db.Model):
         new_user = cls(
             email=data.get('email'),
             nom=data.get('nom'),
-            role=data.get('role', 'client'),
-            date_creation=datetime.utcnow()
+            role='client',
+            date_creation=datetime.now(timezone.utc)
         )
         new_user.set_password(data.get('mot_de_passe'))
         db.session.add(new_user)
         db.session.commit()
         return new_user
+
+
 
     def to_dict(self):
         return {
