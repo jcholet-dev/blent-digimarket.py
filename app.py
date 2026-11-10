@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_jwt_extended import JWTManager
 from models.user_model import db
-from controllers.user_controller import user_bp
+from blueprints import register_blueprints
 
 app = Flask(__name__)
 
@@ -17,7 +17,7 @@ db.init_app(app)
 jwt = JWTManager(app)
 
 # Enregistrement des Blueprints et routes
-app.register_blueprint(user_bp)
+register_blueprints(app)
 
 @app.route('/')
 def home():

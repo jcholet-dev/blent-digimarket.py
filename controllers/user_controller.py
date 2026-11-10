@@ -21,14 +21,14 @@ def register():
 
     # Création de l'utilisateur via le modèle
     new_user = User.create_user(data)
-
+    print(new_user.to_dict())
     return jsonify({
         "message": "Utilisateur créé avec succès",
         "utilisateur": new_user.to_dict()
     }), 201
 
 
-@user_bp.route('/auth', methods=['POST'])
+@user_bp.route('/login', methods=['POST'])  # ✅ Corrigé ici (/login au lieu de /auth)
 def login():
     data = request.get_json()
 
@@ -45,7 +45,7 @@ def login():
     access_token = create_access_token(
         identity=str(user.id),
         additional_claims={
-            "role": user["role"]
+            "role": user.role  # 👈 Utiliser un point (.) au lieu des crochets ([])
         }
     )
 
