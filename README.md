@@ -23,7 +23,7 @@ Placez-vous à la racine du dossier de votre projet :
 cd blent-digimarket
 python -m venv .venv .venv\Scripts\activate
 pip install -r requirements.txt
-
+python app.py
 ```
 
 Ouvrez le navigateur et tapez l'URL : http://127.0.0.1:5000
