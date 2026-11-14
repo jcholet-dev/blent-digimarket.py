@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_jwt_extended import JWTManager
-from models.user_model import db
 from blueprints import register_blueprints
+
 
 app = Flask(__name__)
 
