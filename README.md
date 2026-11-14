@@ -4,6 +4,7 @@
 
 Projet de fin de module sur les bases de Python développé dans le cadre de la formation **Agentic AI avec Blent.ai**.
 Cette application propose une architecture MVC modulaire (avec des Blueprints Flask) pour une plateforme e-commerce, incluant un système d'authentification sécurisé par JWT et une interface web moderne avec Tailwind CSS.
+J'ai utilisé le même formulaire de connexion qu'un projet perso écrit en python / flask.
 
 ---
 
@@ -20,7 +21,6 @@ Assurez-vous d'avoir **Python 3.10 ou supérieur** installé sur votre machine.
 Placez-vous à la racine du dossier de votre projet :
 
 ```bash
-cd blent-digimarket
 python -m venv .venv .venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
