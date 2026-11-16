@@ -11,7 +11,9 @@ class Product(db.Model):
     categorie = db.Column(db.String(100), nullable=False)
     prix = db.Column(db.Float, nullable=False)
     quantite_stock = db.Column(db.Integer, nullable=False, default=0)
-    date_creation = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_creation = db.Column(
+        db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
 
     #Ajout d'un nouveau produit
     @classmethod
@@ -53,6 +55,11 @@ class Product(db.Model):
         products = cls.query.all()
         return [product.to_dict() for product in products]
 
+    #renvoi le nombre total de produits en base
+    @classmethod
+    def countProducts(cls):
+        return cls.query.count()
+
     #Recherche des produits par nom, description ou catégorie
     @classmethod
     def searchProducts(cls, query_string):
@@ -65,6 +72,21 @@ class Product(db.Model):
             )
         ).all()
         return [product.to_dict() for product in products]
+
+    #lister les produits avec pagination
+    @classmethod
+    def getAllProducts_pagination(cls, page=1, per_page=10):
+        """Récupère une liste de produits avec pagination et métadonnées"""
+        pagination = cls.query.paginate(page=page, per_page=per_page, error_out=False)
+
+        return {
+            "products": [product.to_dict() for product in pagination.items],
+            "total": pagination.total,
+            "pages": pagination.pages,
+            "current_page": pagination.page,
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev
+        }
 
     #Convertit l'objet produit en dictionnaire pour les réponses JSON
     def to_dict(self):
