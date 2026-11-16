@@ -23,6 +23,7 @@ Placez-vous à la racine du dossier de votre projet :
 ```bash
 python -m venv .venv .venv\Scripts\activate
 pip install -r requirements.txt
+python init_db.py
 python app.py
 ```
 
