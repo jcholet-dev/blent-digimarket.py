@@ -1,0 +1,65 @@
+from functools import wraps
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from models.user_model import User
+from models.product_model import Product
+
+admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
+
+def admin_required(fn):
+    @wraps(fn)
+    @jwt_required()
+    def decorator(*args, **kwargs):
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        if not user or getattr(user, 'role', 'client') != 'admin':
+            return jsonify({"erreur": "Accès refusé : administrateur requis"}), 403
+
+        return fn(*args, **kwargs)
+    return decorator
+
+
+@admin_bp.route('/dashboard', methods=['GET'])
+@admin_required
+def admin_dashboard():
+    total_products = Product.countProducts()  # Utilisation de la fonction du modèle
+    total_users = User.query.count()
+
+    return jsonify({
+        "message": "Tableau de bord administrateur",
+        "stats": {
+            "total_produits": total_products,
+            "total_utilisateurs": total_users
+        }
+    }), 200
+
+
+@admin_bp.route('/products/<int:product_id>', methods=['PUT'])
+@admin_required
+def admin_update_product(product_id):
+    product = db.session.get(Product, product_id)
+    if not product:
+        return jsonify({"erreur": "Produit non trouvé"}), 404
+
+    data = request.get_json()
+    if 'nom' in data: product.nom = data['nom']
+    if 'prix' in data: product.prix = float(data['prix'])
+    if 'quantite_stock' in data: product.quantite_stock = int(data['quantite_stock'])
+    db.session.commit()
+
+    return jsonify({
+        "message": "Produit mis à jour avec succès",
+        "produit": product.to_dict()
+    }), 200
+
+
+@admin_bp.route('/products/<int:product_id>', methods=['DELETE'])
+@admin_required
+def admin_delete_product(product_id):
+    product = db.session.get(Product, product_id)
+    if not product:
+        return jsonify({"erreur": "Produit non trouvé"}), 404
+
+    product.deleteProduct()
+    return jsonify({"message": "Produit supprimé avec succès"}), 200
