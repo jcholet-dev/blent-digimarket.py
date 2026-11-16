@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.user_model import User
 from models.product_model import Product
@@ -21,18 +21,9 @@ def admin_required(fn):
 
 
 @admin_bp.route('/dashboard', methods=['GET'])
-@admin_required
+#@admin_required
 def admin_dashboard():
-    total_products = Product.countProducts()  # Utilisation de la fonction du modèle
-    total_users = User.query.count()
-
-    return jsonify({
-        "message": "Tableau de bord administrateur",
-        "stats": {
-            "total_produits": total_products,
-            "total_utilisateurs": total_users
-        }
-    }), 200
+    return render_template('admin/dashboard.html')
 
 
 @admin_bp.route('/products/<int:product_id>', methods=['PUT'])
