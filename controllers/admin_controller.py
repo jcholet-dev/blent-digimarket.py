@@ -1,8 +1,10 @@
+# Controller d'administration : gestion des produits, dashboard
 from functools import wraps
 from flask import Blueprint, jsonify, request, render_template
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models.user_model import User
-from models.product_model import Product
+from database import db
+from services.user_service import UserService
+from services.product_service import ProductService
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
@@ -11,7 +13,8 @@ def admin_required(fn):
     @jwt_required()
     def decorator(*args, **kwargs):
         current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
+
+        user = UserService.get_by_id(current_user_id)
 
         if not user or getattr(user, 'role', 'client') != 'admin':
             return jsonify({"erreur": "Accès refusé : administrateur requis"}), 403
@@ -25,18 +28,29 @@ def admin_required(fn):
 def admin_dashboard():
     return render_template('admin/dashboard.html')
 
-
 @admin_bp.route('/products/<int:product_id>', methods=['PUT'])
 @admin_required
 def admin_update_product(product_id):
-    product = db.session.get(Product, product_id)
+
+    product = ProductService.get_by_id(product_id)
     if not product:
         return jsonify({"erreur": "Produit non trouvé"}), 404
 
     data = request.get_json()
-    if 'nom' in data: product.nom = data['nom']
-    if 'prix' in data: product.prix = float(data['prix'])
-    if 'quantite_stock' in data: product.quantite_stock = int(data['quantite_stock'])
+    if not data:
+        return jsonify({"erreur": "Aucune donnée fournie"}), 400
+
+    if 'nom' in data:
+        product.nom = data['nom']
+    if 'description' in data:
+        product.description = data['description']
+    if 'categorie' in data:
+        product.categorie = data['categorie']
+    if 'prix' in data:
+        product.prix = float(data['prix'])
+    if 'quantite_stock' in data:
+        product.quantite_stock = int(data['quantite_stock'])
+
     db.session.commit()
 
     return jsonify({
@@ -48,9 +62,8 @@ def admin_update_product(product_id):
 @admin_bp.route('/products/<int:product_id>', methods=['DELETE'])
 @admin_required
 def admin_delete_product(product_id):
-    product = db.session.get(Product, product_id)
-    if not product:
+    success = ProductService.delete_product(product_id)
+    if not success:
         return jsonify({"erreur": "Produit non trouvé"}), 404
 
-    product.deleteProduct()
     return jsonify({"message": "Produit supprimé avec succès"}), 200

@@ -1,7 +1,8 @@
-from database import db  # Import de l'instance unique
-from models.product_model import Product
+from models.product_model import Product  # Nécessaire pour vérifier si la table contient déjà des données
+from services.product_service import ProductService
 
 def seed_products():
+    # Vérification si des produits existent déjà
     if Product.query.first():
         print("⚠️ Les produits existent déjà.")
         return
@@ -38,6 +39,8 @@ def seed_products():
         }
     ]
 
+    # Utilisation du service pour créer chaque produit
     for data in products_data:
-        Product.createProduct(data)
-    print("✅ Produits de test ajoutés.")
+        ProductService.create_product(data)
+
+    print("✅ Produits de test ajoutés avec succès.")

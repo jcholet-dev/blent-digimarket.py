@@ -1,5 +1,5 @@
-from database import db  # Import de l'instance unique
 from models.user_model import User
+from services.user_service import UserService
 
 def seed_users():
     if User.query.first():
@@ -8,17 +8,32 @@ def seed_users():
 
     print("👤 Insertion des utilisateurs...")
 
-    # Clients
-    User.create_user({"nom": "Sophie Martin", "email": "sophie@example.com", "mot_de_passe": "password123"})
-    User.create_user({"nom": "Lucas Bernard", "email": "lucas@example.com", "mot_de_passe": "password123"})
+    UserService.create_user({
+        "nom": "Sophie Martin",
+        "email": "sophie@example.com",
+        "mot_de_passe": "password123",
+        "role": "client"
+    })
 
-    # Admins
-    admin1 = User(nom="Admin Principal", email="admin@digimarket.com", role="admin")
-    admin1.set_password("adminsecure123")
+    UserService.create_user({
+        "nom": "Lucas Bernard",
+        "email": "lucas@example.com",
+        "mot_de_passe": "password123",
+        "role": "client"
+    })
 
-    admin2 = User(nom="Claire Admin", email="claire.admin@digimarket.com", role="admin")
-    admin2.set_password("adminsecure456")
+    UserService.create_user({
+        "nom": "Admin Principal",
+        "email": "admin@digimarket.com",
+        "mot_de_passe": "adminsecure123",
+        "role": "admin"
+    })
 
-    db.session.add_all([admin1, admin2])
-    db.session.commit()
-    print("✅ 2 clients et 2 administrateurs ajoutés.")
+    UserService.create_user({
+        "nom": "Claire Admin",
+        "email": "claire.admin@digimarket.com",
+        "mot_de_passe": "adminsecure456",
+        "role": "admin"
+    })
+
+    print("✅ 2 clients et 2 administrateurs ajoutés avec succès.")

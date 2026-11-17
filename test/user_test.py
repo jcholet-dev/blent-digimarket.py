@@ -1,5 +1,4 @@
-import pytest
-from models.user_model import User, db
+from services.user_service import UserService
 
 def test_create_user(app):
     with app.app_context():
@@ -9,7 +8,7 @@ def test_create_user(app):
             "mot_de_passe": "secret123"
         }
 
-        user = User.create_user(data)
+        user = UserService.create_user(data)
 
         assert user.id is not None
         assert user.nom == "Alice Dupont"
@@ -17,22 +16,31 @@ def test_create_user(app):
         assert user.role == "client"
         assert user.mot_de_passe != "secret123"
 
-
-def test_password_hashing(app):
+def test_password_verification(app):
     with app.app_context():
-        user = User(nom="Bob", email="bob@example.com")
-        user.set_password("mon_super_mdp")
-        assert user.mot_de_passe != "mon_super_mdp"
-        assert user.check_password("mon_super_mdp") is True
-        assert user.check_password("mauvais_mdp") is False
+        data = {
+            "nom": "Bob",
+            "email": "bob@example.com",
+            "mot_de_passe": "mon_super_mdp"
+        }
 
+        user = UserService.create_user(data)
+
+        assert user.mot_de_passe != "mon_super_mdp"
+        assert UserService.verify_password(user, "mon_super_mdp") is True
+        assert UserService.verify_password(user, "mauvais_mdp") is False
 
 def test_user_to_dict(app):
     with app.app_context():
-        user = User(nom="Charlie", email="charlie@example.com", role="admin")
-        user.set_password("password123")
-        db.session.add(user)
-        db.session.commit()
+        data = {
+            "nom": "Charlie",
+            "email": "charlie@example.com",
+            "mot_de_passe": "password123",
+            "role": "admin"
+        }
+
+        user = UserService.create_user(data)
+
         user_dict = user.to_dict()
         assert user_dict["nom"] == "Charlie"
         assert user_dict["email"] == "charlie@example.com"
