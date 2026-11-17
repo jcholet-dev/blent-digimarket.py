@@ -119,9 +119,14 @@
                 localStorage.setItem('role', data.role);
 
                 showAlert("Connexion réussie ! Redirection...", "success");
+
+                // Redirection conditionnelle selon le rôle
                 setTimeout(() => {
-                    // Ici tu pourras rediriger vers le catalogue ou le dashboard selon le rôle
-                    alert("Connecté en tant que : " + data.role);
+                    if (data.role === 'admin') {
+                        window.location.href = '/api/admin/dashboard'; // Route du dashboard admin
+                    } else {
+                        window.location.href = '/'; // Page d'accueil / boutique client
+                    }
                 }, 1000);
 
             } catch (error) {
