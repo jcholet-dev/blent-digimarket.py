@@ -12,8 +12,6 @@ class User(db.Model):
     role = db.Column(db.String(50), nullable=False, default='client')
     date_creation = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    # 🔗 RELATION ORM : Permet d'accéder à toutes les commandes du client (ex: user.commandes)
-    # cascade='all, delete-orphan' supprime automatiquement ses commandes si le compte est supprimé
     commandes = db.relationship('Command', backref='client_associe', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
@@ -42,6 +40,5 @@ class User(db.Model):
             "nom": self.nom,
             "role": self.role,
             "date_creation": self.date_creation.isoformat() if self.date_creation else None,
-            # Optionnel : tu peux inclure un résumé des commandes si besoin
             "commandes_count": len(self.commandes)
         }
