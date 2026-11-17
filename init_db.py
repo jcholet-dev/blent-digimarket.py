@@ -1,8 +1,8 @@
 from app import app
 from database import db
-from seed_users import seed_users
-from seed_products import seed_products
-from seed_orders import seed_orders
+from seed.seed_users import seed_users
+from seed.seed_products import seed_products
+from seed.seed_orders import seed_orders
 
 def init_database():
     with app.app_context():
