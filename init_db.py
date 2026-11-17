@@ -7,11 +7,10 @@ def init_database():
     with app.app_context():
         print("🚀 Démarrage de l'initialisation de la base de données...")
 
-        # Création des tables
+        db.drop_all()
         db.create_all()
-        print("🛠️ Tables créées avec succès.")
+        print("🛠️ Tables réinitialisées avec succès.")
 
-        # Insertion des données
         seed_users()
         seed_products()
 
