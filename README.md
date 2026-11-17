@@ -1,5 +1,3 @@
-######### Markdown
-
 # Blent Digimarket - Application E-commerce (Flask)
 
 Projet de fin de module sur les bases de Python développé dans le cadre de la formation **Agentic AI avec Blent.ai**.
@@ -7,6 +5,21 @@ Cette application propose une architecture MVC modulaire (avec des Blueprints Fl
 J'ai utilisé le même formulaire de connexion qu'un projet perso écrit en python / flask.
 
 ---
+
+# 📚 Documentation de l'API
+
+L'application expose une API REST structurée autour de plusieurs Blueprints.
+
+### 1. Authentification (/api/auth)
+
+POST /api/auth/register : Inscription d'un nouvel utilisateur (rôle par défaut : client).
+
+POST /api/auth/login : Connexion et récupération du Token JWT.
+
+
+---
+
+
 
 ## 🚀 Guide d'installation et de lancement rapide
 
