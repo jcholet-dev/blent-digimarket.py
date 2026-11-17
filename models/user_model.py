@@ -1,8 +1,6 @@
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from database import db  # <--- Utilisation de l'instance unique partagée
 
 class User(db.Model):
     __tablename__ = 'utilisateur'
@@ -32,8 +30,6 @@ class User(db.Model):
         db.session.add(new_user)
         db.session.commit()
         return new_user
-
-
 
     def to_dict(self):
         return {

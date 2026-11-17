@@ -1,4 +1,5 @@
-from models.product_model import db, Product
+from database import db  # Import de l'instance unique
+from models.product_model import Product
 
 def seed_products():
     if Product.query.first():

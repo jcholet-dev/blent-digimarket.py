@@ -1,4 +1,5 @@
-from models.user_model import db, User
+from database import db  # Import de l'instance unique
+from models.user_model import User
 
 def seed_users():
     if User.query.first():

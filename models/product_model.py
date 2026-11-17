@@ -1,7 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
+from database import db  # <--- Utilisation de l'instance unique partagée
 from datetime import datetime, timezone
 
-db = SQLAlchemy()
 class Product(db.Model):
     __tablename__ = 'produit'
 
@@ -15,7 +14,7 @@ class Product(db.Model):
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
 
-    #Ajout d'un nouveau produit
+    # Ajout d'un nouveau produit
     @classmethod
     def createProduct(cls, data):
         new_product = cls(
@@ -30,12 +29,12 @@ class Product(db.Model):
         db.session.commit()
         return new_product
 
-    #Suppression d'un produit
+    # Suppression d'un produit
     def deleteProduct(self):
         db.session.delete(self)
         db.session.commit()
 
-    #Gestion des stocks (ajout ou retrait de quantité)
+    # Gestion des stocks (ajout ou retrait de quantité)
     def updateStock(self, quantity_change):
         self.quantite_stock += quantity_change
         if self.quantite_stock < 0:
@@ -43,24 +42,24 @@ class Product(db.Model):
         db.session.commit()
         return self
 
-    #Recherche un produit par son ID et retourne sa fiche détaillée
+    # Recherche un produit par son ID et retourne sa fiche détaillée
     @classmethod
     def getProduct(cls, product_id):
         product = db.session.get(cls, product_id)
         return product.to_dict() if product else None
 
-    #Récupère tous les produits de la base et les renvoie au format json
+    # Récupère tous les produits de la base et les renvoie au format json
     @classmethod
     def getAllProducts(cls):
         products = cls.query.all()
         return [product.to_dict() for product in products]
 
-    #renvoi le nombre total de produits en base
+    # Renvoi le nombre total de produits en base
     @classmethod
     def countProducts(cls):
         return cls.query.count()
 
-    #Recherche des produits par nom, description ou catégorie
+    # Recherche des produits par nom, description ou catégorie
     @classmethod
     def searchProducts(cls, query_string):
         search_term = f"%{query_string}%"
@@ -73,7 +72,7 @@ class Product(db.Model):
         ).all()
         return [product.to_dict() for product in products]
 
-    #lister les produits avec pagination
+    # Lister les produits avec pagination
     @classmethod
     def getAllProducts_pagination(cls, page=1, per_page=10):
         """Récupère une liste de produits avec pagination et métadonnées"""
@@ -88,7 +87,7 @@ class Product(db.Model):
             "has_prev": pagination.has_prev
         }
 
-    #Convertit l'objet produit en dictionnaire pour les réponses JSON
+    # Convertit l'objet produit en dictionnaire pour les réponses JSON
     def to_dict(self):
         return {
             "id": self.id,

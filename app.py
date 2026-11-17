@@ -1,31 +1,29 @@
 from flask import Flask, render_template
 from flask_jwt_extended import JWTManager
-from models.user_model import db  # <--- Importation indispensable de db depuis tes modèles
-from blueprints import register_blueprints
+from database import db  # 1. On importe l'instance db en premier
 
 app = Flask(__name__)
 
-# Clé secrète pour les JWT
+# Configuration
 app.config["JWT_SECRET_KEY"] = "votre-cle-secrete-super-securisee"
-
-# Configuration de la base de données SQLite (digimarket.db à la racine du projet)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///digimarket.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Initialisations
+# 2. On initialise db avec l'application TOUT DE SUITE
 db.init_app(app)
 jwt = JWTManager(app)
 
-# Enregistrement des Blueprints et routes
+# 3. ON IMPORTE LES MODELES APRES l'initialisation de db
+from models.user_model import User
+from models.product_model import Product
+
+# 4. On importe et enregistre les blueprints après
+from blueprints import register_blueprints
 register_blueprints(app)
 
 @app.route('/')
 def home():
     return render_template('index.html')
-
-# Création automatique des tables dans digimarket.db au premier lancement
-with app.app_context():
-    db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True)
