@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DigiMarket - Admin{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-900">
+
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 hidden md:block">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-indigo-600">DigiMarket</span>
+            </div>
+            <nav class="mt-6 space-y-1">
+                <a href="/api/admin/dashboard" class="flex items-center px-6 py-3 {% if request.path == '/api/admin/dashboard' %}text-indigo-600 bg-indigo-50 border-r-4 border-indigo-600 font-medium{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    Tableau de bord
+                </a>
+                <a href="/api/admin/orders" class="flex items-center px-6 py-3 {% if request.path == '/api/admin/orders' %}text-indigo-600 bg-indigo-50 border-r-4 border-indigo-600 font-medium{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    Commandes
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Contenu principal -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header / Topbar -->
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-8 border-b border-gray-200">
+                <h1 class="text-xl font-semibold text-gray-800">{% block header_title %}Tableau de bord{% endblock %}</h1>
+                <div class="flex items-center space-x-4">
+                    <span id="admin-name" class="text-sm font-medium text-gray-600">Admin</span>
+                    <button onclick="logout()" class="text-sm text-red-600 hover:text-red-800 font-medium">Déconnexion</button>
+                </div>
+            </header>
+
+            <!-- Main Content (Injecté par les pages filles) -->
+            <main class="p-8 flex-1">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('role');
+            window.location.href = '/';
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

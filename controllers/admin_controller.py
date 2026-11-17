@@ -28,6 +28,11 @@ def admin_required(fn):
 def admin_dashboard():
     return render_template('admin/dashboard.html')
 
+@admin_bp.route('/orders', methods=['GET'])
+# @admin_required
+def admin_orders():
+    return render_template('admin/orders.html')
+
 @admin_bp.route('/products/<int:product_id>', methods=['PUT'])
 @admin_required
 def admin_update_product(product_id):

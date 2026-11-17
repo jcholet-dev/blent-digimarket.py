@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+
+{% block title %}DigiMarket - Gestion des Commandes{% endblock %}
+{% block header_title %}Gestion des Commandes{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow border border-gray-100 overflow-hidden">
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h2 class="text-lg font-medium text-gray-800">Liste des commandes clients</h2>
+        <span class="text-sm text-gray-500">Total : <span id="orders-count" class="font-semibold text-gray-800">8</span> commandes</span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                    <th class="py-3 px-6 font-semibold">ID Commande</th>
+                    <th class="py-3 px-6 font-semibold">Client (ID)</th>
+                    <th class="py-3 px-6 font-semibold">Date</th>
+                    <th class="py-3 px-6 font-semibold">Adresse de livraison</th>
+                    <th class="py-3 px-6 font-semibold">Statut</th>
+                    <th class="py-3 px-6 font-semibold text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body" class="divide-y divide-gray-200 text-sm text-gray-700">
+                <!-- Exemple de ligne statique / Données Mock -->
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="py-4 px-6 font-medium text-gray-900">#1</td>
+                    <td class="py-4 px-6">Client #3</td>
+                    <td class="py-4 px-6">24/05/2026 14:30</td>
+                    <td class="py-4 px-6">123 Avenue des Champs-Élysées, Paris</td>
+                    <td class="py-4 px-6">
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2.5 py-1 rounded-full font-medium">en_attente</span>
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <button class="text-indigo-600 hover:text-indigo-900 font-medium">Voir détails</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
