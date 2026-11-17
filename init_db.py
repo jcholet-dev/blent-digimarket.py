@@ -2,6 +2,7 @@ from app import app
 from database import db
 from seed_users import seed_users
 from seed_products import seed_products
+from seed_orders import seed_orders
 
 def init_database():
     with app.app_context():
@@ -13,6 +14,7 @@ def init_database():
 
         seed_users()
         seed_products()
+        seed_orders()
 
         print("\n✨ Base de données initialisée avec succès !")
 

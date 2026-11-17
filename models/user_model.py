@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import db  # <--- Utilisation de l'instance unique partagée
+from database import db
 
 class User(db.Model):
     __tablename__ = 'utilisateur'
@@ -11,6 +11,8 @@ class User(db.Model):
     nom = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(50), nullable=False, default='client')
     date_creation = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    commandes = db.relationship('Command', backref='client_associe', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.mot_de_passe = generate_password_hash(password)
@@ -23,7 +25,7 @@ class User(db.Model):
         new_user = cls(
             email=data.get('email'),
             nom=data.get('nom'),
-            role='client',
+            role=data.get('role', 'client'),
             date_creation=datetime.now(timezone.utc)
         )
         new_user.set_password(data.get('mot_de_passe'))
@@ -37,5 +39,6 @@ class User(db.Model):
             "email": self.email,
             "nom": self.nom,
             "role": self.role,
-            "date_creation": self.date_creation.isoformat() if self.date_creation else None
+            "date_creation": self.date_creation.isoformat() if self.date_creation else None,
+            "commandes_count": len(self.commandes)
         }
