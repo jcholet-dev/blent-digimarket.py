@@ -72,3 +72,22 @@ def admin_delete_product(product_id):
         return jsonify({"erreur": "Produit non trouvé"}), 404
 
     return jsonify({"message": "Produit supprimé avec succès"}), 200
+
+@admin_bp.route('/products', methods=['POST'])
+@admin_required
+def admin_create_product():
+    data = request.get_json()
+
+    if not data or not data.get('nom') or not data.get('prix') or not data.get('categorie'):
+        return jsonify({"erreur": "Les champs obligatoires (nom, prix, categorie) sont manquants"}), 400
+
+    try:
+        # Utilisation de la méthode de classe du modèle ou du service
+        nouveau_produit = Product.createProduct(data)
+
+        return jsonify({
+            "message": "Produit créé avec succès",
+            "produit": nouveau_produit.to_dict()
+        }), 201
+    except Exception as e:
+        return jsonify({"erreur": f"Erreur lors de la création : {str(e)}"}), 500
