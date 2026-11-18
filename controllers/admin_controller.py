@@ -24,14 +24,26 @@ def admin_required(fn):
 
 
 @admin_bp.route('/dashboard', methods=['GET'])
-#@admin_required
+# @admin_required
 def admin_dashboard():
-    return render_template('admin/dashboard.html')
+
+    products = ProductService.get_all_products()
+    total_products = ProductService.count_products()
+    total_orders = Command.query.count()
+
+    return render_template(
+        'admin/dashboard.html',
+        products=products,
+        total_products=total_products,
+        total_orders=5
+    )
 
 @admin_bp.route('/orders', methods=['GET'])
 # @admin_required
 def admin_orders():
-    return render_template('admin/orders.html')
+    from models.order_model import Command
+    orders = Command.query.all()
+    return render_template('admin/orders.html', orders=orders)
 
 @admin_bp.route('/products/<int:product_id>', methods=['PUT'])
 @admin_required
@@ -91,3 +103,28 @@ def admin_create_product():
         }), 201
     except Exception as e:
         return jsonify({"erreur": f"Erreur lors de la création : {str(e)}"}), 500
+
+@admin_bp.route('/api/admin/orders/${orderId}/status', methods=['PUT'])
+# @admin_required
+def admin_update_order_status(order_id):
+    from models.order_model import Command
+    from database import db
+
+    order = Command.query.get(order_id)
+    if not order:
+        return jsonify({"erreur": "Commande introuvable"}), 404
+
+    data = request.get_json()
+    nouveau_statut = data.get('statut')
+
+    statuts_valides = ['en_attente', 'validée', 'expédiée', 'annulée']
+    if nouveau_statut not in statuts_valides:
+        return jsonify({"erreur": "Statut invalide"}), 400
+
+    order.statut = nouveau_statut
+    db.session.commit()
+
+    return jsonify({
+        "message": "Statut mis à jour avec succès",
+        "statut": order.statut
+    }), 200

@@ -7,7 +7,7 @@
 <div class="bg-white rounded-lg shadow border border-gray-100 overflow-hidden">
     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
         <h2 class="text-lg font-medium text-gray-800">Liste des commandes clients</h2>
-        <span class="text-sm text-gray-500">Total : <span id="orders-count" class="font-semibold text-gray-800">8</span> commandes</span>
+        <span class="text-sm text-gray-500">Total : <span class="font-semibold text-gray-800">{{ orders|length }}</span> commandes</span>
     </div>
 
     <div class="overflow-x-auto">
@@ -22,22 +22,152 @@
                     <th class="py-3 px-6 font-semibold text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody id="orders-table-body" class="divide-y divide-gray-200 text-sm text-gray-700">
-                <!-- Exemple de ligne statique / Données Mock -->
+            <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
+                {% for order in orders %}
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="py-4 px-6 font-medium text-gray-900">#1</td>
-                    <td class="py-4 px-6">Client #3</td>
-                    <td class="py-4 px-6">24/05/2026 14:30</td>
-                    <td class="py-4 px-6">123 Avenue des Champs-Élysées, Paris</td>
+                    <td class="py-4 px-6 font-medium text-gray-900">#{{ order.id }}</td>
+                    <td class="py-4 px-6">Client #{{ order.utilisateur_id }}</td>
+                    <td class="py-4 px-6">{{ order.date_commande.strftime('%d/%m/%Y %H:%M') if order.date_commande else 'Récemment' }}</td>
+                    <td class="py-4 px-6">{{ order.adresse_livraison }}</td>
                     <td class="py-4 px-6">
-                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2.5 py-1 rounded-full font-medium">en_attente</span>
+                        {% if order.statut == 'validée' %}
+                            <span class="bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded-full font-medium">Validée</span>
+                        {% elif order.statut == 'expédiée' %}
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-full font-medium">Expédiée</span>
+                        {% elif order.statut == 'annulée' %}
+                            <span class="bg-red-100 text-red-800 text-xs px-2.5 py-1 rounded-full font-medium">Annulée</span>
+                        {% else %}
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2.5 py-1 rounded-full font-medium">En attente</span>
+                        {% endif %}
                     </td>
                     <td class="py-4 px-6 text-right space-x-2">
-                        <button class="text-indigo-600 hover:text-indigo-900 font-medium">Voir détails</button>
+                        <button onclick='openOrderModal({{ order.to_dict() | tojson | safe }})' class="text-indigo-600 hover:text-indigo-900 font-medium">Voir détails</button>
                     </td>
                 </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="py-6 text-center text-gray-400">Aucune commande enregistrée.</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<!-- MODAL DE DÉTAIL DE LA COMMANDE -->
+<div id="orderModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+            <h3 class="text-lg font-semibold text-gray-800" id="modalTitle">Détails de la commande</h3>
+            <button onclick="closeOrderModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-500">Client ID :</p>
+                    <p id="modalClientId" class="font-medium text-gray-900">-</p>
+                </div>
+                <div>
+                    <label class="block text-gray-500 mb-1">Statut :</label>
+                    <select id="modalStatusSelect" onchange="updateOrderStatus(currentOrderId, this.value)" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white font-medium text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="en_attente">En attente</option>
+                        <option value="validée">Validée</option>
+                        <option value="expédiée">Expédiée</option>
+                        <option value="annulée">Annulée</option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-gray-500">Adresse de livraison :</p>
+                    <p id="modalAddress" class="font-medium text-gray-900">-</p>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">Articles commandés :</h4>
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                            <tr>
+                                <th class="py-2 px-4">Produit</th>
+                                <th class="py-2 px-4">Catégorie</th>
+                                <th class="py-2 px-4">Quantité</th>
+                                <th class="py-2 px-4 text-right">Prix Unitaire</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalItemsBody" class="divide-y divide-gray-200 text-gray-700">
+                            <!-- Injecté par JS au clic -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 border-t border-gray-200 text-right">
+            <button onclick="closeOrderModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition">Fermer</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentOrderId = null;
+
+    function openOrderModal(order) {
+        currentOrderId = order.id;
+        document.getElementById('modalTitle').textContent = `Détails de la commande #${order.id}`;
+        document.getElementById('modalClientId').textContent = `Client #${order.utilisateur_id}`;
+
+        // Sélectionner le bon statut dans le menu déroulant
+        document.getElementById('modalStatusSelect').value = order.statut;
+
+        document.getElementById('modalAddress').textContent = order.adresse_livraison;
+
+        const itemsBody = document.getElementById('modalItemsBody');
+        itemsBody.innerHTML = '';
+
+        if (order.lignes && order.lignes.length > 0) {
+            order.lignes.forEach(ligne => {
+                itemsBody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-2 px-4 font-medium text-gray-900">${ligne.produit ? ligne.produit.nom : 'Produit #' + ligne.produit_id}</td>
+                        <td class="py-2 px-4"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">${ligne.produit ? ligne.produit.categorie : 'N/A'}</span></td>
+                        <td class="py-2 px-4 font-semibold">${ligne.quantite}</td>
+                        <td class="py-2 px-4 text-right">${ligne.prix_unitaire} €</td>
+                    </tr>
+                `;
+            });
+        } else {
+            itemsBody.innerHTML = `<tr><td colspan="4" class="py-3 px-4 text-center text-gray-400">Aucun article.</td></tr>`;
+        }
+
+        document.getElementById('orderModal').classList.remove('hidden');
+    }
+
+    async function updateOrderStatus(orderId, nouveauStatut) {
+        try {
+            const response = await fetch(`/admin/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ statut: nouveauStatut })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.erreur || "Erreur lors de la mise à jour du statut.");
+                return;
+            }
+
+            window.location.reload();
+
+        } catch (error) {
+            console.error("Erreur réseau :", error);
+            alert("Impossible de contacter le serveur.");
+        }
+    }
+
+    function closeOrderModal() {
+        document.getElementById('orderModal').classList.add('hidden');
+    }
+</script>
 {% endblock %}
