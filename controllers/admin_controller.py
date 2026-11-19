@@ -6,26 +6,15 @@ from database import db
 from services.user_service import UserService
 from services.product_service import ProductService
 from models.order_model import Command, LigneCommande
+from utils.decorators import admin_required
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
-def admin_required(fn):
-    @wraps(fn)
-    @jwt_required()
-    def decorator(*args, **kwargs):
-        current_user_id = get_jwt_identity()
 
-        user = UserService.get_by_id(current_user_id)
-
-        if not user or getattr(user, 'role', 'client') != 'admin':
-            return jsonify({"erreur": "Accès refusé : administrateur requis"}), 403
-
-        return fn(*args, **kwargs)
-    return decorator
 
 
 @admin_bp.route('/dashboard', methods=['GET'])
-# @admin_required
+@admin_required
 def admin_dashboard():
 
     products = ProductService.get_all_products()
@@ -40,7 +29,7 @@ def admin_dashboard():
     )
 
 @admin_bp.route('/orders', methods=['GET'])
-# @admin_required
+@admin_required
 def admin_orders():
     from models.order_model import Command
     orders = Command.query.all()
@@ -106,7 +95,7 @@ def admin_create_product():
         return jsonify({"erreur": f"Erreur lors de la création : {str(e)}"}), 500
 
 @admin_bp.route('/api/admin/orders/${orderId}/status', methods=['PUT'])
-# @admin_required
+@admin_required
 def admin_update_order_status(order_id):
     from models.order_model import Command
     from database import db

@@ -92,6 +92,31 @@
             document.getElementById('alertBox').classList.add('hidden');
         }
 
+        // Fonction pour naviguer vers une page protégée en envoyant le JWT dans les headers
+        async function navigateWithToken(url) {
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    showAlert("Erreur d'accès à la page protégée.");
+                }
+            } catch (error) {
+                console.error("Erreur réseau :", error);
+                showAlert("Impossible de contacter le serveur.");
+            }
+        }
+
         // Gestion de la connexion
         async function handleLogin(event) {
             event.preventDefault();
@@ -114,20 +139,20 @@
                     return;
                 }
 
-                // Succès : Stocker le token JWT dans le localStorage
+                // Succès : Stocker le token JWT et le rôle dans le localStorage
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('role', data.role);
 
                 showAlert("Connexion réussie ! Redirection...", "success");
 
-                // Redirection conditionnelle selon le rôle
+                // Redirection sécurisée avec transmission du token via fetch
                 setTimeout(() => {
                     if (data.role === 'admin') {
-                        window.location.href = '/api/admin/dashboard'; // Route du dashboard admin
+                        navigateWithToken('/api/admin/dashboard');
                     } else if(data.role === "client") {
-                        window.location.href = '/api/shop'
+                        navigateWithToken('/api/shop');
                     } else {
-                        window.location.href = '/'; // Page d'accueil / boutique client
+                        navigateWithToken('/');
                     }
                 }, 1000);
 
