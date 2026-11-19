@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiMarket - Mon Panier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 min-h-full flex flex-col antialiased">
+
+    {% include 'shop/topbar.html' %}
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+        <div class="mb-10">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Mon Panier</h1>
+            <p class="text-sm text-slate-500 mt-1">Vérifiez vos articles avant de valider votre commande.</p>
+        </div>
+
+        <div id="cart-container">
+            {% if cart.articles and cart.articles|length > 0 %}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Liste des articles -->
+                    <div class="lg:col-span-2 space-y-4">
+                        {% for item in cart.articles %}
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex items-center justify-between gap-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-slate-100 h-16 w-16 rounded-xl flex items-center justify-center text-2xl">
+                                    📦
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-lg">{{ item.produit.nom }}</h3>
+                                    <p class="text-sm text-slate-500">Prix unitaire : <strong class="text-slate-700">{{ item.produit.prix }} €</strong></p>
+                                    <div class="flex items-center space-x-2 mt-2">
+                                        <label for="qty-{{ item.produit.id }}" class="text-xs text-slate-500 font-medium">Quantité :</label>
+                                        <input type="number" id="qty-{{ item.produit.id }}" value="{{ item.quantite }}" min="1"
+                                               onchange="modifierQuantite('{{ item.produit.id }}', this.value)"
+                                               class="w-16 text-center border border-slate-300 rounded-lg text-sm py-1 font-semibold focus:outline-none focus:border-indigo-600">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right flex flex-col items-end gap-2">
+                                <span class="text-lg font-black text-indigo-600" id="subtotal-{{ item.produit.id }}">{{ item.sous_total }} €</span>
+                                <button type="button" onclick="modifierQuantite('{{ item.produit.id }}', 0)" class="text-xs text-rose-600 hover:text-rose-800 font-semibold transition-colors">
+                                    Supprimer
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Résumé du panier -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 h-fit space-y-6">
+                        <h2 class="text-xl font-bold text-slate-900 border-b border-slate-100 pb-4">Résumé de la commande</h2>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between text-slate-600">
+                               <span>Sous-total</span>
+                               <span class="font-semibold text-slate-900" id="cart-total-general">{{ cart.total_general }} €</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Livraison</span>
+                                <span class="font-semibold text-emerald-600">Gratuite</span>
+                            </div>
+                            <div class="border-t border-slate-100 pt-3 flex justify-between text-base font-bold text-slate-900">
+                                <span>Total général</span>
+                                <span class="text-indigo-600 text-xl" id="cart-total-general-final">{{ cart.total_general }} €</span>
+                            </div>
+                        </div>
+                        <button type="button" onclick="alert('Fonctionnalité de paiement à venir !')" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold py-3 rounded-xl transition-all shadow-sm shadow-indigo-200 text-center">
+                            Passer la commande
+                        </button>
+                        <a href="/api/shop/" class="block text-center text-sm text-indigo-600 hover:text-indigo-800 font-semibold mt-2">
+                            ← Continuer mes achats
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <span class="text-5xl">🛒</span>
+                    <p class="text-lg font-semibold text-slate-700">Votre panier est vide.</p>
+                    <p class="text-sm text-slate-400">Découvrez notre catalogue pour ajouter des articles.</p>
+                    <a href="/api/shop/" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all shadow-sm">
+                        Voir le catalogue
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-8 text-center text-sm text-slate-500 mt-auto">
+        <p>&copy; 2026 DigiMarket. Tous droits réservés.</p>
+    </footer>
+
+    <!-- Script JavaScript pour la modification dynamique -->
+    <script>
+        async function modifierQuantite(produitId, nouvelleQuantite) {
+            try {
+                const response = await fetch('/api/shop/cart/update-api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        produit_id: produitId,
+                        quantite: parseInt(nouvelleQuantite)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) {
+                        badge.textContent = result.cart_count;
+                    }
+
+                    if (result.articles.length === 0) {
+                        location.reload();
+                    } else {
+                        document.getElementById('cart-total-general').textContent = result.total_general + ' €';
+                        document.getElementById('cart-total-general-final').textContent = result.total_general + ' €';
+                        const itemData = result.articles.find(item => item.produit.id == produitId);
+                        const subtotalEl = document.getElementById(`subtotal-${produitId}`);
+                        if (itemData && subtotalEl) {
+                            subtotalEl.textContent = itemData.sous_total + ' €';
+                        } else if (!itemData) {
+                            location.reload();
+                        }
+                    }
+                } else {
+                    alert(result.error || "Erreur lors de la mise à jour du panier.");
+                }
+            } catch (error) {
+                console.error('Erreur réseau:', error);
+                alert("Impossible de joindre le serveur.");
+            }
+        }
+    </script>
+</body>
+</html>

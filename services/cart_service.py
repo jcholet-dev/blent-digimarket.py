@@ -32,10 +32,23 @@ class CartService:
             session.modified = True
 
     @classmethod
-    def get_cart_item_count(cls):
-        """Retourne le nombre total d'articles dans le panier."""
+    def update_quantity(cls, produit_id, quantite):
         cart = cls._get_raw_cart()
-        return sum(int(qty) for qty in cart.values())
+        produit_id_str = str(produit_id)
+        quantite = int(quantite)
+
+        if produit_id_str in cart:
+            if quantite > 0:
+                cart[produit_id_str] = quantite
+            else:
+                del cart[produit_id_str]
+            session['cart'] = cart
+            session.modified = True
+
+    @classmethod
+    def get_cart_item_count(cls):
+        cart = cls._get_raw_cart()
+        return len(cart)
 
     @classmethod
     def get_cart_details(cls):
