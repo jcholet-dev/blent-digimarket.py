@@ -101,7 +101,7 @@
             </div>
 
             <!-- Formulaire pointant vers le traitement backend -->
-            <form action="/api/shop/checkout/process" method="POST" class="space-y-4">
+            <form id="checkoutForm" onsubmit="handleCheckout(event)" class="space-y-4">
                 <div>
                     <label for="adresse" class="block text-sm font-semibold text-slate-700 mb-1">Adresse postale</label>
                     <input type="text" id="adresse" name="adresse" required placeholder="123 rue de la République" class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-600 font-medium">
@@ -190,6 +190,45 @@
                 alert("Impossible de joindre le serveur.");
             }
         }
+
+    async function handleCheckout(event) {
+        event.preventDefault();
+        const token = localStorage.getItem('access_token');
+
+        if (!token) {
+            alert("Veuillez vous reconnecter.");
+            window.location.href = '/';
+            return;
+        }
+
+        const adresse = document.getElementById('adresse').value;
+        const code_postal = document.getElementById('code_postal').value;
+        const ville = document.getElementById('ville').value;
+
+        try {
+            const response = await fetch('/api/shop/checkout/process', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ adresse, code_postal, ville })
+            });
+
+            if (response.ok) {
+                const html = await response.text();
+                document.open();
+                document.write(html);
+                document.close();
+            } else {
+                const data = await response.json().catch(() => ({}));
+                alert(data.error || "Erreur lors de la validation de la commande.");
+            }
+        } catch (error) {
+            console.error("Erreur réseau :", error);
+            alert("Impossible de joindre le serveur.");
+        }
+    }
     </script>
 </body>
 </html>

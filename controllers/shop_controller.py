@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from services.product_service import ProductService
 from services.cart_service import CartService
 from services.order_service import OrderService
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 
 shop_bp = Blueprint('shop', __name__, url_prefix='/api/shop')
 
@@ -72,21 +74,41 @@ def checkout_page():
         return redirect(url_for('shop.view_cart'))
     cart_count = CartService.get_cart_item_count()
     return render_template('shop/checkout.html', cart=cart_data, cart_count=cart_count)
-@shop_bp.route('/checkout/process', methods=['POST'])
-def process_checkout():
-    cart_data = CartService.get_cart_details()
-    if not cart_data["articles"]:
-        return redirect(url_for('shop.view_cart'))
 
-    adresse = request.form.get('adresse')
-    code_postal = request.form.get('code_postal')
-    ville = request.form.get('ville')
+@shop_bp.route('/checkout/process', methods=['POST'])
+@jwt_required()
+def process_checkout():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"success": False, "error": "Données invalides"}), 400
+
+    adresse = data.get('adresse')
+    code_postal = data.get('code_postal')
+    ville = data.get('ville')
+
+    if not adresse or not code_postal or not ville:
+        return jsonify({"success": False, "error": "Tous les champs d'adresse sont requis"}), 400
 
     adresse_complete = f"{adresse}, {code_postal} {ville}"
 
+    cart_data = CartService.get_cart_details()
+    if not cart_data["articles"]:
+        return jsonify({"success": False, "error": "Votre panier est vide"}), 400
+
     try:
         order_id = OrderService.create_order(cart_data, adresse_complete)
-        return render_template('shop/success.html', order_id=order_id, cart_count=0)
+        return render_template('shop/success.html', order_id=order_id, cart_count=0), 200
     except Exception as e:
         print(f"Erreur lors de la commande : {e}")
-        return redirect(url_for('shop.view_cart'))
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@shop_bp.route('/orders', methods=['GET'])
+@jwt_required()
+def view_orders():
+    user_id = int(get_jwt_identity())
+
+    orders = OrderService.get_user_orders(user_id)
+    cart_count = CartService.get_cart_item_count()
+
+    return render_template('shop/orders.html', orders=orders, cart_count=cart_count)

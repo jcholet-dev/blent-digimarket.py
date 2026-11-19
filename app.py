@@ -8,7 +8,12 @@ from models.order_model import Command, LigneCommande
 app = Flask(__name__)
 
 # Configuration
+app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+app.config["JWT_COOKIE_SECURE"] = False  # True en production (HTTPS)
+app.config["JWT_ACCESS_COOKIE_PATH"] = "/"
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False  # Désactivé pour simplifier le projet
 app.config["JWT_SECRET_KEY"] = "votre-cle-secrete-super-securisee"
+
 app.config["SECRET_KEY"] = "une-cle-secrete-tres-difficile-a-deviner-pour-les-sessions"  # <-- AJOUTE CETTE LIGNE
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///digimarket.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
