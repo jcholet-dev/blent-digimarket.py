@@ -9,14 +9,12 @@ app = Flask(__name__)
 
 # Configuration
 app.config["JWT_SECRET_KEY"] = "votre-cle-secrete-super-securisee"
+app.config["SECRET_KEY"] = "une-cle-secrete-tres-difficile-a-deviner-pour-les-sessions"  # <-- AJOUTE CETTE LIGNE
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///digimarket.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# 2. On initialise db avec l'application TOUT DE SUITE
 db.init_app(app)
 jwt = JWTManager(app)
-
-
 
 
 # 4. On importe et enregistre les blueprints après

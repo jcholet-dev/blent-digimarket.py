@@ -4,45 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DigiMarket - Boutique</title>
-    <!-- Bon CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 font-sans text-slate-900 min-h-full flex flex-col antialiased">
 
-    <!-- Topbar / Navigation Client -->
-    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <span class="text-2xl font-black tracking-tight text-indigo-600">DigiMarket</span>
-            </div>
-            <div class="flex items-center space-x-6">
-                <a href="/shop/cart" class="text-slate-600 hover:text-indigo-600 font-medium flex items-center space-x-1.5 transition-colors">
-                    <span class="text-lg">🛒</span>
-                    <span>Panier</span>
-                </a>
-                <a href="/logout" class="text-sm text-rose-600 hover:text-rose-700 font-semibold transition-colors">Déconnexion</a>
-            </div>
-        </div>
-    </header>
+    {% include 'shop/topbar.html' %}
 
-    <!-- Contenu Principal : Catalogue -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
-        <!-- En-tête de section -->
         <div class="mb-10">
             <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Catalogue des produits</h1>
             <p class="text-sm text-slate-500 mt-1">Découvrez nos articles disponibles (<span class="font-semibold text-slate-700">{{ data.total }}</span> produits au total)</p>
         </div>
 
-        <!-- Grille des produits -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% if data.products and data.products|length > 0 %}
                 {% for product in data.products %}
+                {% set prod_id = product.id if product.id is defined else product['id'] %}
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden flex flex-col justify-between hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     <div>
-                        <!-- Visuel / Placeholder -->
                         <div class="bg-gradient-to-br from-slate-100 to-slate-200 h-52 w-full flex items-center justify-center text-slate-400 relative overflow-hidden">
                             <span class="text-5xl drop-shadow-sm">📦</span>
-                            <div class="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors"></div>
                         </div>
                         <div class="p-5">
                             <div class="flex items-center justify-between mb-3">
@@ -54,14 +35,19 @@
                         </div>
                     </div>
 
-                    <!-- Pied de carte : Prix et Action -->
-                    <div class="p-5 pt-0 flex items-center justify-between border-t border-slate-100 mt-4 pt-4">
-                        <div class="flex flex-col">
-                            <span class="text-xs text-slate-400 uppercase font-semibold">Prix</span>
-                            <span class="text-xl font-black text-indigo-600">{{ product.prix }} €</span>
+                    <div class="p-5 pt-0 border-t border-slate-100 mt-4 pt-4 flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex flex-col">
+                                <span class="text-xs text-slate-400 uppercase font-semibold">Prix</span>
+                                <span class="text-xl font-black text-indigo-600">{{ product.prix }} €</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <label for="qty-{{ prod_id }}" class="text-xs text-slate-500 font-medium">Qté:</label>
+                                <input type="number" id="qty-{{ prod_id }}" value="1" min="1" max="{{ product.quantite_stock }}" class="w-14 text-center border border-slate-300 rounded-lg text-sm py-1 focus:outline-none focus:border-indigo-600 font-semibold">
+                            </div>
                         </div>
-                        <button type="button" onclick="ajouterAuPanier('{{ product.nom }}')" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-indigo-200">
-                            Ajouter
+                        <button type="button" onclick="ajouterAuPanier('{{ prod_id }}')" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-sm font-semibold py-2.5 rounded-xl transition-all shadow-sm shadow-indigo-200 text-center">
+                            Ajouter au panier
                         </button>
                     </div>
                 </div>
@@ -69,16 +55,14 @@
             {% else %}
                 <div class="col-span-full text-center py-16 text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-sm">
                     <p class="text-lg font-semibold text-slate-700">Aucun produit disponible pour le moment.</p>
-                    <p class="text-sm text-slate-400 mt-1">Vérifiez que vous avez bien exécuté le script de seed pour les produits.</p>
                 </div>
             {% endif %}
         </div>
 
-        <!-- Pagination -->
         {% if data.pages > 1 %}
         <nav class="flex justify-center items-center space-x-3 mt-12" aria-label="Pagination">
             {% if data.has_prev %}
-                <a href="?page={{ data.current_page - 1 }}" class="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm">Précédent</a>
+                <a href="?page={{ data.current_page - 1 }}" class="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Précédent</a>
             {% else %}
                 <span class="px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-400 cursor-not-allowed">Précédent</span>
             {% endif %}
@@ -86,7 +70,7 @@
             <span class="text-sm font-medium text-slate-600 px-3">Page <strong class="text-slate-900">{{ data.current_page }}</strong> sur <strong class="text-slate-900">{{ data.pages }}</strong></span>
 
             {% if data.has_next %}
-                <a href="?page={{ data.current_page + 1 }}" class="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm">Suivant</a>
+                <a href="?page={{ data.current_page + 1 }}" class="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-sm">Suivant</a>
             {% else %}
                 <span class="px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-400 cursor-not-allowed">Suivant</span>
             {% endif %}
@@ -94,14 +78,42 @@
         {% endif %}
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-8 text-center text-sm text-slate-500 mt-auto">
         <p>&copy; 2026 DigiMarket. Tous droits réservés.</p>
     </footer>
 
     <script>
-        function ajouterAuPanier(nomProduit) {
-            alert("Le produit \"" + nomProduit + "\" a bien été ajouté au panier !");
+        async function ajouterAuPanier(produitId) {
+            const qtyInput = document.getElementById(`qty-${produitId}`);
+            const quantite = qtyInput ? parseInt(qtyInput.value) : 1;
+
+            try {
+                const response = await fetch('/api/shop/cart/add-api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        produit_id: produitId,
+                        quantite: quantite
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) {
+                        badge.textContent = result.cart_count;
+                    }
+                    alert(result.message);
+                } else {
+                    alert(result.error || "Erreur lors de l'ajout au panier.");
+                }
+            } catch (error) {
+                console.error('Erreur réseau:', error);
+                alert("Impossible de joindre le serveur.");
+            }
         }
     </script>
 </body>
