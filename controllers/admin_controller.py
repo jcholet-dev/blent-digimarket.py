@@ -11,12 +11,9 @@ from utils.decorators import admin_required
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
 
-
-
 @admin_bp.route('/dashboard', methods=['GET'])
 @admin_required
 def admin_dashboard():
-
     products = ProductService.get_all_products()
     total_products = ProductService.count_products()
     total_orders = Command.query.count()
@@ -25,20 +22,18 @@ def admin_dashboard():
         'admin/dashboard.html',
         products=products,
         total_products=total_products,
-        total_orders=5
+        total_orders=total_orders  # Correction : utilisation de la variable dynamique
     )
 
 @admin_bp.route('/orders', methods=['GET'])
 @admin_required
 def admin_orders():
-    from models.order_model import Command
     orders = Command.query.all()
     return render_template('admin/orders.html', orders=orders)
 
 @admin_bp.route('/products/<int:product_id>', methods=['PUT'])
 @admin_required
 def admin_update_product(product_id):
-
     product = ProductService.get_by_id(product_id)
     if not product:
         return jsonify({"erreur": "Produit non trouvé"}), 404
@@ -84,8 +79,8 @@ def admin_create_product():
         return jsonify({"erreur": "Les champs obligatoires (nom, prix, categorie) sont manquants"}), 400
 
     try:
-        # Utilisation de la méthode de classe du modèle ou du service
-        nouveau_produit = Product.createProduct(data)
+        # Correction : Utilisation du ProductService au lieu d'une méthode inexistante sur le modèle
+        nouveau_produit = ProductService.create_product(data)
 
         return jsonify({
             "message": "Produit créé avec succès",
@@ -94,17 +89,17 @@ def admin_create_product():
     except Exception as e:
         return jsonify({"erreur": f"Erreur lors de la création : {str(e)}"}), 500
 
-@admin_bp.route('/api/admin/orders/${orderId}/status', methods=['PUT'])
+@admin_bp.route('/orders/<int:order_id>/status', methods=['PUT'])
 @admin_required
 def admin_update_order_status(order_id):
-    from models.order_model import Command
-    from database import db
-
     order = Command.query.get(order_id)
     if not order:
         return jsonify({"erreur": "Commande introuvable"}), 404
 
     data = request.get_json()
+    if not data:
+        return jsonify({"erreur": "Données manquantes"}), 400
+
     nouveau_statut = data.get('statut')
 
     statuts_valides = ['en_attente', 'validée', 'expédiée', 'annulée']
