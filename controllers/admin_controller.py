@@ -22,7 +22,7 @@ def admin_dashboard():
         'admin/dashboard.html',
         products=products,
         total_products=total_products,
-        total_orders=total_orders  # Correction : utilisation de la variable dynamique
+        total_orders=total_orders
     )
 
 @admin_bp.route('/orders', methods=['GET'])
@@ -79,9 +79,7 @@ def admin_create_product():
         return jsonify({"erreur": "Les champs obligatoires (nom, prix, categorie) sont manquants"}), 400
 
     try:
-        # Correction : Utilisation du ProductService au lieu d'une méthode inexistante sur le modèle
         nouveau_produit = ProductService.create_product(data)
-
         return jsonify({
             "message": "Produit créé avec succès",
             "produit": nouveau_produit.to_dict()

@@ -117,7 +117,6 @@
         document.getElementById('modalTitle').textContent = `Détails de la commande #${order.id}`;
         document.getElementById('modalClientId').textContent = `Client #${order.utilisateur_id}`;
 
-        // Sélectionner le bon statut dans le menu déroulant
         document.getElementById('modalStatusSelect').value = order.statut;
 
         document.getElementById('modalAddress').textContent = order.adresse_livraison;
@@ -144,10 +143,15 @@
     }
 
     async function updateOrderStatus(orderId, nouveauStatut) {
+        const token = localStorage.getItem('access_token');
+
         try {
-            const response = await fetch(`/admin/orders/${orderId}/status`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+            const response = await fetch(`/api/commandes/${orderId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ statut: nouveauStatut })
             });
 
@@ -158,7 +162,8 @@
                 return;
             }
 
-            window.location.reload();
+            // Utilisation de navigateWithToken pour conserver la session admin lors du rafraîchissement
+            navigateWithToken('/api/admin/orders');
 
         } catch (error) {
             console.error("Erreur réseau :", error);

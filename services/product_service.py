@@ -21,7 +21,6 @@ class ProductService:
 
     @staticmethod
     def delete_product(product_id):
-        # Remplacement de Product.query.get par db.session.get
         product = db.session.get(Product, product_id)
         if product:
             db.session.delete(product)
@@ -31,7 +30,6 @@ class ProductService:
 
     @staticmethod
     def update_stock(product_id, quantity_change):
-        # Remplacement de Product.query.get par db.session.get
         product = db.session.get(Product, product_id)
         if not product:
             return None
@@ -45,7 +43,6 @@ class ProductService:
 
     @staticmethod
     def get_by_id(product_id):
-        # Remplacement de Product.query.get par db.session.get
         return db.session.get(Product, product_id)
 
     @staticmethod

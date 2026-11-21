@@ -86,12 +86,14 @@
         async function ajouterAuPanier(produitId) {
             const qtyInput = document.getElementById(`qty-${produitId}`);
             const quantite = qtyInput ? parseInt(qtyInput.value) : 1;
+            const token = localStorage.getItem('access_token');
 
             try {
                 const response = await fetch('/api/shop/cart/add-api', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                     },
                     body: JSON.stringify({
                         produit_id: produitId,
@@ -106,7 +108,7 @@
                     if (badge) {
                         badge.textContent = result.cart_count;
                     }
-                    alert(result.message);
+                    alert(result.message || "Produit ajouté au panier !");
                 } else {
                     alert(result.error || "Erreur lors de l'ajout au panier.");
                 }

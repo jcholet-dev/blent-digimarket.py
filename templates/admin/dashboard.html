@@ -161,7 +161,7 @@
         document.getElementById('editProductModal').classList.add('hidden');
     }
 
-    // --- REQUÊTES SÉCURISÉES AVEC JWT ---
+    // --- REQUÊTES AVEC LES ROUTES HARMONISÉES /api/produits ---
 
     // Supprimer un produit
     async function deleteProduct(productId) {
@@ -169,13 +169,12 @@
         const token = localStorage.getItem('access_token');
 
         try {
-            const response = await fetch(`/api/admin/products/${productId}`, {
+            const response = await fetch(`/api/produits/${productId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (response.ok) {
-                // Utilisation de navigateWithToken pour garder le JWT lors du rafraîchissement
                 navigateWithToken('/api/admin/dashboard');
             } else {
                 const data = await response.json();
@@ -199,7 +198,7 @@
         };
 
         try {
-            const response = await fetch('/api/admin/products', {
+            const response = await fetch('/api/produits', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -219,7 +218,6 @@
         }
     }
 
-    // Modifier un produit
     async function handleEditProduct(event) {
         event.preventDefault();
         const token = localStorage.getItem('access_token');
@@ -233,7 +231,7 @@
         };
 
         try {
-            const response = await fetch(`/api/admin/products/${productId}`, {
+            const response = await fetch(`/api/produits/${productId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

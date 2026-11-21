@@ -145,7 +145,7 @@
 
                 showAlert("Connexion réussie ! Redirection...", "success");
 
-                // Redirection sécurisée avec transmission du token via fetch
+                // Redirection sécurisée avec transmission du token
                 setTimeout(() => {
                     if (data.role === 'admin') {
                         navigateWithToken('/api/admin/dashboard');
