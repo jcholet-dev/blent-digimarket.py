@@ -42,7 +42,7 @@
                                 <span class="font-semibold text-slate-800">{{ ligne.produit_associe.nom if ligne.produit_associe else 'Produit' }}</span>
                                 <span class="text-slate-400">x{{ ligne.quantite }}</span>
                             </div>
-                            <span class="font-semibold text-slate-900">{{ ligne.prix_unitaire * ligne.quantite }} €</span>
+                            <span class="font-semibold text-slate-900">{{ "%.2f"|format(ligne.prix_unitaire * ligne.quantite) }} €</span>
                         </div>
                         {% endfor %}
                     </div>
@@ -55,7 +55,8 @@
                         <div class="text-right">
                             <span class="text-slate-500 mr-2">Total :</span>
                             <span class="text-lg font-black text-indigo-600">
-                                {{ commande.lignes | sum(attribute='prix_unitaire') }} €
+                                {# Utilise directement commande.total si défini dans ton modèle SQLAlchemy, ou calcule via une méthode #}
+                                {{ "%.2f"|format(commande.total if commande.total is defined else commande.lignes | sum(attribute='prix_unitaire')) }} €
                             </span>
                         </div>
                     </div>
@@ -66,7 +67,7 @@
             <div class="text-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <span class="text-5xl">📦</span>
                 <p class="text-lg font-semibold text-slate-700">Vous n'avez pas encore passé de commande.</p>
-                <a href="/api/produits" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all shadow-sm">
+                <a href="/api/shop/" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all shadow-sm">
                     Découvrir le catalogue
                 </a>
             </div>

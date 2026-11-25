@@ -190,44 +190,43 @@
         }
 
         async function handleCheckout(event) {
-            event.preventDefault();
-            const token = localStorage.getItem('access_token');
+    event.preventDefault();
+    const token = localStorage.getItem('access_token');
 
-            if (!token) {
-                alert("Veuillez vous reconnecter.");
-                window.location.href = '/';
-                return;
-            }
+    if (!token) {
+        alert("Veuillez vous reconnecter.");
+        window.location.href = '/';
+        return;
+    }
 
-            const rue = document.getElementById('adresse').value;
-            const code_postal = document.getElementById('code_postal').value;
-            const ville = document.getElementById('ville').value;
+    const rue = document.getElementById('adresse').value;
+    const code_postal = document.getElementById('code_postal').value;
+    const ville = document.getElementById('ville').value;
 
-            const adresse_livraison = `${rue}, ${code_postal} ${ville}`;
+    const adresse_livraison = `${rue}, ${code_postal} ${ville}`;
 
-            try {
-                const response = await fetch('/api/commandes', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ adresse_livraison })
-                });
+    try {
+        const response = await fetch('/api/commandes', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ adresse_livraison })
+        });
 
-                const data = await response.json();
+        const data = await response.json();
 
-                if (response.ok) {
-                    alert("Commande validée avec succès !");
-                    window.location.href = '/api/shop/orders';
-                } else {
-                    alert(data.erreur || data.error || "Erreur lors de la validation de la commande.");
-                }
-            } catch (error) {
-                console.error("Erreur réseau :", error);
-                alert("Impossible de joindre le serveur.");
-            }
+        if (response.ok && data.success) {
+            window.location.href = `/api/commandes/success`;
+        } else {
+            alert(data.erreur || data.error || "Erreur lors de la validation de la commande.");
         }
+    } catch (error) {
+        console.error("Erreur réseau :", error);
+        alert("Impossible de joindre le serveur.");
+    }
+}
     </script>
 </body>
 </html>
