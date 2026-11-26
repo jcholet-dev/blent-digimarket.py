@@ -7,7 +7,11 @@ product_bp = Blueprint('produits', __name__, url_prefix='/api/produits')
 
 @product_bp.route('', methods=['GET'])
 def get_products():
-    products = ProductService.get_all_products()
+    query = request.args.get('q', '').strip()
+    if query:
+        products = ProductService.search_products(query)
+    else:
+        products = ProductService.get_all_products()
     return jsonify([p.to_dict() for p in products]), 200
 
 @product_bp.route('/<int:product_id>', methods=['GET'])

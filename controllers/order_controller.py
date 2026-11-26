@@ -78,3 +78,21 @@ def update_order_status(order_id):
     commande.statut = nouveau_statut
     db.session.commit()
     return jsonify({"message": "Statut mis à jour", "statut": commande.statut}), 200
+
+
+@order_bp.route('', methods=['GET'])
+@jwt_required()
+def get_commandes():
+    claims = get_jwt()
+    user_id = int(get_jwt_identity())
+
+    if claims.get("role") == "admin":
+        # L'admin voit toutes les commandes
+        commandes = Command.query.order_by(Command.date_commande.desc()).all()
+    else:
+        # Le client ne voit que ses propres commandes
+        commandes = Command.query.filter_by(
+            utilisateur_id=user_id
+        ).order_by(Command.date_commande.desc()).all()
+
+    return jsonify([c.to_dict() for c in commandes]), 200
